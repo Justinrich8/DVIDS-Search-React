@@ -20,7 +20,7 @@ import {
 // import { CustomCard } from '../components/CustomCard';
 
 const hierarchicalFacetFieldIds = ["c_hierarchicalFacet"];
-const filterSearchFields = [{ fieldApiName: "name", entityType: "ce_images" }];
+const filterSearchFields = [{ fieldApiName: "name", entityType: "ce_image" }];
 const employeeFilterConfigs = [
   { value: "Consulting" },
   { value: "Technology" },
