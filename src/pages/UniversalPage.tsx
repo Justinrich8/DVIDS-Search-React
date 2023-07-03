@@ -21,9 +21,9 @@ const visualAutocompleteConfig: VisualAutocompleteConfig = {
     ...config,
     headlessId: 'visual-autocomplete'
   }),
-  includedVerticals: ['people'],
+  includedVerticals: ['images'],
   renderEntityPreviews: (isLoading, verticalKeyToResults, dropdownItemProps) => {
-    if (!verticalKeyToResults.people) {
+    if (!verticalKeyToResults.images) {
       return null;
     }
 

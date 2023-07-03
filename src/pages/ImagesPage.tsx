@@ -1,75 +1,93 @@
-import { useSearchActions, Matcher, useSearchState, SelectableStaticFilter } from '@yext/search-headless-react';
+import { useLayoutEffect } from "react";
+import { useSearchActions } from "@yext/search-headless-react";
 import {
   AppliedFilters,
+  FilterSearch,
   ResultsCount,
   SearchBar,
   StandardCard,
   VerticalResults,
   LocationBias,
-  MapboxMap,
+  StaticFilters,
+  StandardFacets,
+  HierarchicalFacets,
+  FilterDivider,
+  ApplyFiltersButton,
   Pagination,
-  MapboxMapProps,
-  OnDragHandler,
-  Coordinate
-} from '@yext/search-ui-react';
-import { LngLat, LngLatBounds } from 'mapbox-gl';
-import { useCallback, useLayoutEffect } from 'react';
-import { MapPin } from '../components/MapPin';
+  NumericalFacets,
+  AlternativeVerticals,
+} from "@yext/search-ui-react";
+// import { CustomCard } from '../components/CustomCard';
 
-export interface Images {
-  yextDisplayCoordinate?: Coordinate
-}
-
-const mapboxOptions: MapboxMapProps<Location>['mapboxOptions'] = {
-  zoom: 10
+const hierarchicalFacetFieldIds = ["c_hierarchicalFacet"];
+const filterSearchFields = [{ fieldApiName: "name", entityType: "ce_images" }];
+const employeeFilterConfigs = [
+  { value: "Consulting" },
+  { value: "Technology" },
+];
+const hierarchicalFilterConfigs = [{ value: "Computer & Tablets" }];
+const alternativeVerticalsConfigMap = {
+  products: { label: "Products" },
 };
 
 export function ImagesPage() {
   const searchActions = useSearchActions();
-  const filters = useSearchState(state => state.filters.static);
   useLayoutEffect(() => {
-    searchActions.setVertical('KM');
+    searchActions.setVertical("images");
     searchActions.executeVerticalQuery();
-  }, [searchActions]);
+  });
 
-  const onDrag: OnDragHandler = useCallback(
-    (center: LngLat, bounds: LngLatBounds) => {
-      const radius = center.distanceTo(bounds.getNorthEast());
-      const nonLocationFilters: SelectableStaticFilter[] = filters?.filter(f => f.filter.kind !== 'fieldValue' || f.filter.fieldId !== 'builtin.location') ?? [];
-      const nearFilter: SelectableStaticFilter = {
-        selected: true,
-        displayName: 'Near Current Area',
-        filter: {
-          kind: 'fieldValue',
-          fieldId: 'builtin.location',
-          matcher: Matcher.Near,
-          value: { ...center, radius }
-        }
-      };
-      searchActions.setStaticFilters([...nonLocationFilters, nearFilter]);
-      searchActions.executeVerticalQuery();
-    }, [filters, searchActions]);
   return (
     <div>
       <SearchBar />
-      <div className='flex flex-col'>
-        <div className='flex items-baseline'>
-          <ResultsCount />
-          <AppliedFilters />
-        </div>
-        <div className='h-80 mb-4'>
-          <MapboxMap
-            mapboxAccessToken={process.env.REACT_APP_MAPBOX_API_KEY || 'REPLACE_KEY'}
-            mapboxOptions={mapboxOptions}
-            PinComponent={MapPin}
-            onDrag={onDrag}
+      <div className="flex">
+        <div className="w-56 shrink-0 mr-5">
+          <FilterSearch
+            searchFields={filterSearchFields}
+            searchOnSelect={true}
+            label="Filters"
           />
+          <FilterDivider />
+          <StaticFilters
+            fieldId="c_employeeDepartment"
+            title="Static Employee Department"
+            filterOptions={employeeFilterConfigs}
+          />
+          <StaticFilters
+            fieldId="c_hierarchicalFacet"
+            title="Static Hierarchical Facets"
+            filterOptions={hierarchicalFilterConfigs}
+          />
+          <NumericalFacets />
+          <StandardFacets excludedFieldIds={hierarchicalFacetFieldIds} />
+          <HierarchicalFacets
+            collapsible={true}
+            includedFieldIds={hierarchicalFacetFieldIds}
+          />
+          <br />
+          <ApplyFiltersButton />
         </div>
-        <VerticalResults
-          CardComponent={StandardCard}
-        />
-        <Pagination />
-        <LocationBias />
+        <div className="flex-grow">
+          <AlternativeVerticals
+            currentVerticalLabel="Images"
+            verticalConfigMap={{
+              products: { label: "Products" },
+            }}
+          />
+          <div className="flex items-baseline">
+            <ResultsCount />
+            <AppliedFilters
+              hierarchicalFacetsFieldIds={hierarchicalFacetFieldIds}
+            />
+          </div>
+          <VerticalResults CardComponent={StandardCard} />
+          {/* Test generic result type  */}
+          {/* <VerticalResults
+            CardComponent={CustomCard}
+          /> */}
+          <Pagination />
+          <LocationBias />
+        </div>
       </div>
     </div>
   );
